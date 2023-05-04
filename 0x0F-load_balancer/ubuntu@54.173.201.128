@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Updating the package list to install HAproxy
+sudo apt-get update
+
+# Installing  HAProxy inside my lb server
+sudo apt-get install -y haproxy
+
+# This script Updates HAProxy configuration file to configure it with my two servers
+sudo tee /etc/haproxy/haproxy.cfg > /dev/null << EOF
+frontend http_front
+    bind *:80
+    default_backend http_back
+backend http_back
+    balance roundrobin
+    server web-01 34.201.164.207 check
+    server web-02 54.84.88.116 check
+EOF
+
+# start the load balancer with init
+sudo /etc/init.d/haproxy start
+
+# set HAProxy to start at boot
+sudo update-rc.d haproxy defaults
+
+# reload HAProxy configuration
+sudo /etc/init.d/haproxy reload
